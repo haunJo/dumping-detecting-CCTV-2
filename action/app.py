@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 
+import json
 import torch
 import clip
 import matplotlib.pyplot as plt
@@ -25,7 +26,7 @@ with torch.no_grad():
 # @app.route('/tensor', methods=['GET'])
 def tensor():
     if request.method == "POST":
-        video_anno = dict(filename='./videos/walking.mp4', start_index=0)
+        video_anno = dict(filename='output.mp4', start_index=0)
         video = preprocess(video_anno).unsqueeze(0).to(device)
 
         with torch.no_grad():
@@ -36,6 +37,7 @@ def tensor():
         similarity = (100 * video_features @ text_features.T).softmax(dim=-1)
         probs = similarity.cpu().numpy()
         prob = probs.flatten().tolist()
+        prob = json.dumps({"dumping" : prob[0], "walking" : prob[1]})
 
         return prob
 

@@ -10,7 +10,6 @@ import time
 from datetime import datetime, timedelta
 from io import BytesIO
 from PIL import Image
-from data.Send_S3 import send_s3
 from data.Send_mysql import send_mysql
 from modules.detect import Detector
 from modules.classify import Classifier
