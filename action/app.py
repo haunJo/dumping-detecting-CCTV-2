@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 
+import pygame
 import json
 import torch
 import clip
@@ -7,6 +8,10 @@ import matplotlib.pyplot as plt
 
 from models.load import init_actionclip
 from mmaction.utils import register_all_modules
+
+pygame.mixer.init()
+pygame.mixer.music.load('info.mp3')
+
 
 app = Flask(__name__)
 register_all_modules(True)
@@ -26,7 +31,8 @@ with torch.no_grad():
 # @app.route('/tensor', methods=['GET'])
 def tensor():
     if request.method == "POST":
-        video_anno = dict(filename='output.mp4', start_index=0)
+        data = request.json
+        video_anno = dict(filename=data['filenum'], start_index=0)
         video = preprocess(video_anno).unsqueeze(0).to(device)
 
         with torch.no_grad():
@@ -37,7 +43,10 @@ def tensor():
         similarity = (100 * video_features @ text_features.T).softmax(dim=-1)
         probs = similarity.cpu().numpy()
         prob = probs.flatten().tolist()
+        if prob[0] > 0.75:
+            pygame.mixer.music.play()
         prob = json.dumps({"dumping" : prob[0], "walking" : prob[1]})
+        
 
         return prob
 
